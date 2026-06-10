@@ -957,7 +957,7 @@ function loadData(){
   D=seedData();
   saveData(false);
 }
-function saveData(refresh=true){ localStorage.setItem(SK,JSON.stringify(D)); if(refresh) refreshAll(); }
+function saveData(refresh=true){ localStorage.setItem(SK,JSON.stringify(D)); if(refresh) loadCloudData(); }
 
 function migrateData(data){
   if(!data.accounts) data.accounts=[];
@@ -1134,7 +1134,7 @@ function showApp(){
   document.getElementById('adminBox').style.display=isAdmin?'':'none';
   updateSidebar();
   updateTopbar();
-  refreshAll();
+  loadCloudData();
 }
 
 function updateSidebar(){
@@ -1969,8 +1969,60 @@ function wire(){
     if((t=e.target.closest('[data-unlock-user]'))) { unlockUser(t.dataset.unlockUser); return; }
   });
 }
+const API_URL = "https://script.google.com/macros/s/AKfycbxmJJP212jmheEdKnV4I6CAFDXQs0MoiZYRqsw3kxPDYCOpbkkzPB2Z_plSMNRudLq1xA/exec";
 
-// ── Boot ──
+async function loadCloudData(){
+
+  try{
+
+    const res = await fetch(API_URL);
+
+    const cloud = await res.json();
+
+    D.accounts = cloud.accounts || [];
+    D.invoices = cloud.invoices || [];
+    D.payments = cloud.payments || [];
+    D.users = cloud.users || [];
+    D.advancePayments = cloud.advancePayments || [];
+
+    loadCloudData();
+
+    console.log("Cloud loaded");
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("Cloud failed");
+
+  }
+
+}  
+  
+async function saveToCloud(sheet,row){
+
+  try{
+
+    await fetch(API_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"text/plain;charset=utf-8"
+      },
+      body:JSON.stringify({
+        sheet:sheet,
+        row:row
+      })
+    });
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}  
+   
+  // ── Boot ──
 function boot(){
   loadData();
   populateYears();

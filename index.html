@@ -1502,22 +1502,92 @@ function saveInvoice(){
   const inv={id:editId||uid(),invoiceNo:editId?document.getElementById('invNo').value:nextInvNo(by),accountId,date,billingMonth:bm,billingYear:by,amount:parseFloat(amount),discount:parseFloat(document.getElementById('invDisc').value)||0,dueDate:document.getElementById('invDue').value||defaultDue(by,bm),remarks:document.getElementById('invRemarks').value.trim()};
   const idx=D.invoices.findIndex(i=>i.id===inv.id);
   const isNew=idx<0;
-  if(idx>=0) D.invoices[idx]=inv; else D.invoices.push(inv);
-  logAct(isNew?'INVOICE_CREATED':'INVOICE_UPDATED',inv.invoiceNo+' — '+accName(accountId));
-  closeM('mInvoice');
-  saveData();
-  showToast(isNew?'Invoice created: '+inv.invoiceNo:'Invoice updated','ok');
+  ```javascript
+if(idx>=0){
+
+  D.invoices[idx]=inv;
+
+}else{
+
+  D.invoices.push(inv);
+
+  saveToCloud("Invoices",[
+    inv.id,
+    inv.invoiceNo,
+    inv.accountId,
+    inv.date,
+    inv.billingMonth,
+    inv.billingYear,
+    inv.amount,
+    inv.discount,
+    inv.dueDate,
+    inv.remarks
+  ]);
+
 }
 
+logAct(
+  isNew?'INVOICE_CREATED':'INVOICE_UPDATED',
+  inv.invoiceNo+' — '+accName(accountId)
+);
+
+closeM('mInvoice');
+
+// saveData();
+
+showToast(
+  isNew?'Invoice created: '+inv.invoiceNo:'Invoice updated',
+  'ok'
+);
+```
+
+
+```javascript
 function dupInvoice(srcId){
-  const src=getInv(srcId); if(!src) return;
+
+  const src=getInv(srcId);
+
+  if(!src) return;
+
   const by=src.billingYear;
-  const inv={id:uid(),invoiceNo:nextInvNo(by),accountId:src.accountId,date:today(),billingMonth:src.billingMonth,billingYear:by,amount:src.amount,discount:src.discount||0,dueDate:defaultDue(by,src.billingMonth),remarks:(src.remarks||'')+'(copy)'};
+
+  const inv={
+    id:uid(),
+    invoiceNo:nextInvNo(by),
+    accountId:src.accountId,
+    date:today(),
+    billingMonth:src.billingMonth,
+    billingYear:by,
+    amount:src.amount,
+    discount:src.discount||0,
+    dueDate:defaultDue(by,src.billingMonth),
+    remarks:(src.remarks||'')+'(copy)'
+  };
+
   D.invoices.push(inv);
+
+  saveToCloud("Invoices",[
+    inv.id,
+    inv.invoiceNo,
+    inv.accountId,
+    inv.date,
+    inv.billingMonth,
+    inv.billingYear,
+    inv.amount,
+    inv.discount,
+    inv.dueDate,
+    inv.remarks
+  ]);
+
   logAct('INVOICE_COPIED',inv.invoiceNo+' from '+src.invoiceNo);
-  saveData();
+
+  // saveData();
+
   showToast('Copied as '+inv.invoiceNo,'ok');
+
 }
+```
+
 
 function showInvPrint(id){
   const inv=getInv(id); if(!inv) return;
@@ -1723,12 +1793,36 @@ function saveAccount(){
   const acc={id:document.getElementById('accEditId').value||uid(),name,type:document.getElementById('accType').value,code:document.getElementById('accCode').value.trim(),contact:(document.getElementById('accContact')?.value||'').trim()};
   const idx=D.accounts.findIndex(a=>a.id===acc.id);
   const isNew=idx<0;
-  if(idx>=0) D.accounts[idx]=acc; else D.accounts.push(acc);
-  logAct(isNew?'ACCOUNT_CREATED':'ACCOUNT_UPDATED',acc.name);
-  closeM('mAccount');
-  saveData();
-  showToast('Account saved','ok');
+  ```javascript
+if(idx>=0){
+
+  D.accounts[idx]=acc;
+
+}else{
+
+  D.accounts.push(acc);
+
+  saveToCloud("Accounts",[
+    acc.id,
+    acc.name,
+    acc.type,
+    acc.code,
+    acc.contact
+  ]);
+
 }
+
+logAct(isNew?'ACCOUNT_CREATED':'ACCOUNT_UPDATED',acc.name);
+
+closeM('mAccount');
+
+// saveData();
+
+showToast('Account saved','ok');
+
+}
+```
+
 
 // ── Advance Modal ──
 function openAdvModal(editId){

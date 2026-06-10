@@ -957,7 +957,7 @@ function loadData(){
   D=seedData();
   saveData(false);
 }
-function saveData(refresh=true){ localStorage.setItem(SK,JSON.stringify(D)); if(refresh) loadCloudData(); }
+function saveData(refresh=true){ localStorage.setItem(SK,JSON.stringify(D)); if(refresh) ; }
 
 function migrateData(data){
   if(!data.accounts) data.accounts=[];
@@ -1975,9 +1975,16 @@ async function loadCloudData(){
 
   try{
 
-    const res = await fetch(API_URL);
+    const res = await fetch(API_URL + "?t=" + Date.now(),{
+      method:"GET",
+      mode:"cors"
+    });
 
-    const cloud = await res.json();
+    const text = await res.text();
+
+    console.log(text);
+
+    const cloud = JSON.parse(text);
 
     D.accounts = cloud.accounts || [];
     D.invoices = cloud.invoices || [];
@@ -1985,19 +1992,19 @@ async function loadCloudData(){
     D.users = cloud.users || [];
     D.advancePayments = cloud.advancePayments || [];
 
-    loadCloudData();
+    refreshAll();
 
-    console.log("Cloud loaded");
+    console.log("Cloud loaded successfully");
 
   }catch(err){
 
     console.error(err);
 
-    alert("Cloud failed");
+    alert("Cloud failed: " + err.message);
 
   }
 
-}  
+} 
   
 async function saveToCloud(sheet,row){
 

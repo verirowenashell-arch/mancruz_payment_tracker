@@ -2012,6 +2012,7 @@ async function saveToCloud(sheet,row){
 
     await fetch(API_URL,{
       method:"POST",
+      mode:"no-cors",
       headers:{
         "Content-Type":"text/plain;charset=utf-8"
       },
@@ -2021,13 +2022,17 @@ async function saveToCloud(sheet,row){
       })
     });
 
+    console.log("Saved to cloud:",sheet);
+
   }catch(err){
 
     console.error(err);
 
+    alert("Cloud save failed");
+
   }
 
-}  
+} 
    
   // ── Boot ──
 function boot(){
